@@ -20,7 +20,6 @@
     { "include": "#punctuation" }
   ],
   "repository": {
-
     "comments": {
       "patterns": [
         {
@@ -56,23 +55,11 @@
       ]
     },
 
-    "use-directive": {
-      "patterns": [
-        {
-          "match": "\\b(use)\\s+(#[\\w/]+)",
-          "captures": {
-            "1": { "name": "keyword.control.import" },
-            "2": { "name": "string.unquoted.import" }
-          }
-        }
-      ]
-    },
-
     "keywords": {
       "patterns": [
         {
           "name": "keyword.control",
-          "match": "\\b(if|elsif|else|while|for|case|try|catch|throw|return|break|continue|new|as|in)\\b"
+          "match": "\\b(if|elsif|else|while|for|case|try|catch|throw|return|break|continue|new|as|in|use)\\b"
         },
         {
           "name": "storage.modifier",
@@ -130,7 +117,7 @@
       "patterns": [
         {
           "name": "support.function.builtin",
-          "match": "\\b(sendln|to_int|to_float|to_double|to_bool|to_string|type|length)\\b(?=\\s*\\()"
+          "match": "\\b(to_int|to_float|to_double|to_bool|to_string|type|length)\\b(?=\\s*\\()"
         }
       ]
     },
@@ -139,7 +126,7 @@
       "patterns": [
         {
           "name": "keyword.operator",
-          "match": "&&|\\|\\||==|!=|<=|>=|\\.\\.|->|[+\\-*/%<>=!?:$]"
+          "match": "&&|\\|\\||==|!=|<=|>=|\\.\\.|->|[+\\-*/%<>=!?:$]|#|&"
         }
       ]
     },
