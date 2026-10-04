@@ -1,0 +1,46 @@
+{
+  "name": "sk-vsce",
+  "displayName": "Skorpion Language Extension",
+  "icon": "./images/icon.png",
+  "publisher": "iamtowvee",
+  "version": "2026.10.1",
+  "license": "Apache-2.0",
+  "main": "./extension.js",
+  "activationEvents": [],
+  "repository": {
+    "url": "https://github.com/skorpion-language/sk-vsce"
+  },
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": ["Programming Languages"],
+  "contributes": {
+    "languages": [
+      {
+        "id": "skorpion",
+        "aliases": ["Skorpion", "skorpion", "sk", "Sk", "sK", "SK"],
+        "extensions": [".sk"],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/skorpion.svg",
+          "dark": "./icons/skorpion.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "skorpion",
+        "scopeName": "source.skorpion",
+        "path": "./syntaxes/sk.tmLanguage.json"
+      },
+      {
+        "scopeName": "markdown.skorpion.codeblock",
+        "path": "./syntaxes/skorpion-markdown-injection.json",
+        "injectTo": ["text.html.markdown"],
+        "embeddedLanguages": {
+          "meta.embedded.block.skorpion": "skorpion"
+        }
+      }
+    ]
+  }
+}
