@@ -1,0 +1,124 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Skorpion Project Configuration",
+  "scopeName": "source.spc",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#parameter" }
+  ],
+  "repository": {
+
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.spc",
+          "match": "#!.*$"
+        }
+      ]
+    },
+
+    "parameter": {
+      "patterns": [
+        {
+          "name": "meta.parameter.spc",
+          "begin": "([A-Za-z]+)(\\[)",
+          "beginCaptures": {
+            "1": { "name": "entity.name.tag.spc" },
+            "2": { "name": "punctuation.section.brackets.begin.spc" }
+          },
+          "end": "\\]",
+          "endCaptures": {
+            "0": { "name": "punctuation.section.brackets.end.spc" }
+          },
+          "patterns": [
+            { "include": "#array" },
+            { "include": "#string" },
+            { "include": "#float" },
+            { "include": "#int" },
+            { "include": "#bool" }
+          ]
+        }
+      ]
+    },
+
+    "array": {
+      "patterns": [
+        {
+          "name": "meta.array.spc",
+          "begin": "\\(",
+          "beginCaptures": {
+            "0": { "name": "punctuation.section.array.begin.spc" }
+          },
+          "end": "\\)",
+          "endCaptures": {
+            "0": { "name": "punctuation.section.array.end.spc" }
+          },
+          "patterns": [
+            { "include": "#string" },
+            { "include": "#float" },
+            { "include": "#int" },
+            { "include": "#bool" },
+            {
+              "name": "punctuation.separator.array.spc",
+              "match": ","
+            }
+          ]
+        }
+      ]
+    },
+
+    "string": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.spc",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.spc",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.spc",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.spc",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+
+    "float": {
+      "patterns": [
+        {
+          "name": "constant.numeric.float.spc",
+          "match": "-?\\d+\\.\\d+"
+        }
+      ]
+    },
+
+    "int": {
+      "patterns": [
+        {
+          "name": "constant.numeric.integer.spc",
+          "match": "-?\\d+"
+        }
+      ]
+    },
+
+    "bool": {
+      "patterns": [
+        {
+          "name": "constant.language.bool.spc",
+          "match": "\\b(true|false)\\b"
+        }
+      ]
+    }
+  }
+}

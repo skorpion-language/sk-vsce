@@ -7,6 +7,7 @@ Skorpion syntax highlighting extension for Visual Studio Code
 Adding:
 - Syntax highlighting in Skorpion's files (`.sk`, `.spc`)
 - Skorpion's files (`.sk`, `.spc`) icons
+- IntelliSense (autocomplete, snippets, hover documentation)
 
 ## Version
 Corresponds to Skorpion version `2026.10.b01`.
@@ -15,8 +16,6 @@ Corresponds to Skorpion version `2026.10.b01`.
 
 ```sk
 use std/io
-use #std/io
-use std/io &io
 
 const MyError{msg: string} = new Error
 

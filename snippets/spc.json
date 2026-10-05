@@ -1,0 +1,81 @@
+{
+  "Project Name parameter": {
+    "prefix": "name",
+    "body": [
+      "name[\"${1:MyProject}\"]"
+    ],
+    "description": "The project name that will appear in the output file"
+  },
+  "Project version parameter": {
+    "prefix": "version",
+    "body": [
+      "version[\"${1:1.0.0}\"]"
+    ],
+    "description": "The project version that will appear in the output file"
+  },
+  "Targets parameter": {
+    "prefix": "target",
+    "body": [
+      "target[(\"${1:win}\", \"${2:linux}\")]"
+    ],
+    "description": "Platforms for which executable files need to be built"
+  },
+  "Main file parameter": {
+    "prefix": "main",
+    "body": [
+      "main[\"${1:./main.sk}\"]"
+    ],
+    "description": "Project entry point; Need relative or full path"
+  },
+  "Environment parameter": {
+    "prefix": "env",
+    "body": [
+      "env[\"${1:KEY=value, KEY2=value2}\"]"
+    ],
+    "description": "Environment variables (comma-separated)"
+  },
+  "Execute parameter": {
+    "prefix": "execute",
+    "body": [
+      "execute[\"${1:--flag --other=value}\"]"
+    ],
+    "description": "Build arguments"
+  },
+  "Name build parameter": {
+    "prefix": "buildOutName",
+    "body": [
+      "buildOutName[\"${1:myapp}\"]"
+    ],
+    "description": "Name of the build output file; If defined, then 'version' and 'name' are not used"
+  },
+  "Path build parameter": {
+    "prefix": "buildOutPath",
+    "body": [
+      "buildOutPath[\"${1:bin/}\"]"
+    ],
+    "description": "Path to the build output file"
+  },
+  "Name test parameter": {
+    "prefix": "testOutName",
+    "body": [
+      "testOutName[\"${1:myapp-test}\"]"
+    ],
+    "description": "Name of the test build output file; If defined, then 'version' and 'name' are not used"
+  },
+  "Path test parameter": {
+    "prefix": "testOutPath",
+    "body": [
+      "testOutPath[\"${1:test/}\"]"
+    ],
+    "description": "Path to the test build output file"
+  },
+  "Required only": {
+    "prefix": "required",
+    "body": [
+      "name[\"${1:MyProject}\"]",
+      "version[\"${2:1.0.0}\"]",
+      "main[\"${3:./main.sk}\"]"
+    ],
+    "description": "Path to the test build output file"
+  }
+}

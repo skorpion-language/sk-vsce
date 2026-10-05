@@ -1,116 +1,16 @@
 // extension.js
-const vscode = require('vscode');
-
-const ITEMS = {
-    // === Ключевые слова ===
-    if:     { kind: vscode.CompletionItemKind.Keyword, detail: 'Conditional', doc: 'Conditional branch.', snippet: 'if (${1:condition}) {\n\t$0\n}' },
-    elsif:  { kind: vscode.CompletionItemKind.Keyword, detail: 'Conditional', doc: 'Else-if branch.', snippet: 'elsif (${1:condition}) {\n\t$0\n}' },
-    else:   { kind: vscode.CompletionItemKind.Keyword, detail: 'Conditional', doc: 'Final branch.', snippet: 'else {\n\t$0\n}' },
-    while:  { kind: vscode.CompletionItemKind.Keyword, detail: 'Loop', doc: 'Loop while true.', snippet: 'while (${1:condition}) {\n\t$0\n}' },
-    for:    { kind: vscode.CompletionItemKind.Keyword, detail: 'Loop', doc: 'Iterate over a collection.', snippet: 'for (${1:item} in ${2:collection}) {\n\t$0\n}' },
-    case:   { kind: vscode.CompletionItemKind.Keyword, detail: 'Switch', doc: 'Multi-branch switch.', snippet: 'case (${1:value}) {\n\t${2:1} { $3 },\n\t_ { $0 },\n}' },
-    try:    { kind: vscode.CompletionItemKind.Keyword, detail: 'Exception handling', doc: 'Try block.', snippet: 'try {\n\t$0\n}' },
-    catch:  { kind: vscode.CompletionItemKind.Keyword, detail: 'Exception handling', doc: 'Catch block.', snippet: 'catch (${1:Error} as ${2:e}) {\n\t$0\n}' },
-    throw:  { kind: vscode.CompletionItemKind.Keyword, detail: 'Exception handling', doc: 'Throw an error.', snippet: 'throw ${1:BaseError}{code: ${2:1}}' },
-    return: { kind: vscode.CompletionItemKind.Keyword, detail: 'Return', doc: 'Return from a function.', snippet: 'return ${1:value}' },
-
-    const:  { kind: vscode.CompletionItemKind.Keyword, detail: 'Declaration', doc: 'Immutable binding.', snippet: 'const ${1:Name}{${2:field: type}} = new ${3:Error}' },
-    new:    { kind: vscode.CompletionItemKind.Keyword, detail: 'Constructor', doc: 'Creates an instance.', snippet: 'new ${1:Error}' },
-    as:     { kind: vscode.CompletionItemKind.Keyword, detail: 'Binding', doc: 'Binds a caught error.' },
-    use:    { kind: vscode.CompletionItemKind.Keyword, detail: 'Import', doc: 'Imports a module.', snippet: 'use #${1:std/io}' },
-    includeC: { kind: vscode.CompletionItemKind.Keyword, detail: 'Inline C', doc: 'Embeds a block of C.', snippet: 'includeC ~~~\n\t$0\n~~~' },
-
-    // === Литералы ===
-    true:   { kind: vscode.CompletionItemKind.Constant, detail: 'Boolean', doc: 'Boolean `true`.' },
-    false:  { kind: vscode.CompletionItemKind.Constant, detail: 'Boolean', doc: 'Boolean `false`.' },
-    null:   { kind: vscode.CompletionItemKind.Constant, detail: 'Null', doc: 'Absence of value.' },
-
-    // === Типы ===
-    int:    { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: '64-bit signed integer.' },
-    float:  { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Floating point number.' },
-    double: { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Double-precision float.' },
-    string: { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'UTF-8 text.' },
-    bool:   { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Boolean.' },
-    any:    { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Any value.' },
-    void:   { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'No return value.' },
-    arr:    { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Array: `arr[T]`.', snippet: 'arr[${1:int}]' },
-
-    // === Встроенные функции ===
-    to_int:    { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `int`.', snippet: 'to_int(${1:value})' },
-    to_float:  { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `float`.', snippet: 'to_float(${1:value})' },
-    to_double: { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `double`.', snippet: 'to_double(${1:value})' },
-    to_bool:   { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `bool`.', snippet: 'to_bool(${1:value})' },
-    to_string: { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `string`.', snippet: 'to_string(${1:value})' },
-    type:      { kind: vscode.CompletionItemKind.Function, detail: 'Built-in', doc: 'Returns the type name.', snippet: 'type(${1:value})' },
-
-    // === Встроенные типы ошибок ===
-    Error:        { kind: vscode.CompletionItemKind.Class, detail: 'Built-in type', doc: 'Base error with `msg`.' },
-    BaseError:    { kind: vscode.CompletionItemKind.Class, detail: 'Built-in type', doc: 'Error with integer `code`.' },
-    NetworkError: { kind: vscode.CompletionItemKind.Class, detail: 'Built-in type', doc: 'Extends `BaseError`. Adds `host`.' },
-    TimeoutError: { kind: vscode.CompletionItemKind.Class, detail: 'Built-in type', doc: 'Extends `NetworkError`. Adds `seconds`.' },
-
-    // === Шаблоны ===
-    main:     { kind: vscode.CompletionItemKind.Snippet, detail: 'Entry point', doc: 'Main entry point.', snippet: 'void main(arr args) {\n\t$0\n}' },
-    function: { kind: vscode.CompletionItemKind.Snippet, detail: 'Function', doc: 'Function declaration.', snippet: '${1:type} ${2:name}(${3:args}) {\n\t$0\n}' },
-    variable: { kind: vscode.CompletionItemKind.Snippet, detail: 'Variable', doc: 'Variable declaration.', snippet: '${1:type} ${2:name} = ${3:value}' }
-};
+const { activateSkorpion } = require('./skorpion');
+const { activateSpc } = require('./spc');
 
 function activate(context) {
-    console.log('[skorpion] ACTIVATED');
-    const provider = vscode.languages.registerCompletionItemProvider(
-        'skorpion',
-        {
-            provideCompletionItems() {
-                console.log('[skorpion] provider CALLED');
-                const items = [];
-                for (const [name, meta] of Object.entries(ITEMS)) {
-                    const item = new vscode.CompletionItem(name, meta.kind);
-                    item.detail = meta.detail;
-                    if (meta.doc) {
-                        const md = new vscode.MarkdownString(meta.doc);
-                        md.isTrusted = true;
-                        item.documentation = md;
-                    }
-                    if (meta.snippet) {
-                        item.insertText = new vscode.SnippetString(meta.snippet);
-                        // item.insertTextFormat = vscode.InsertTextFormat.Snippet;
-                    }
-                    items.push(item);
-                }
-                console.log('[skorpion] returning', items.length, 'items');
-                return items;
-            }
-        },
-        '.' // не обязательно, но пусть остаётся
-    );
+    console.log('[sk-vsce] ACTIVATED');
 
-    // === Hover ===
-    const hover = vscode.languages.registerHoverProvider('skorpion', {
-        provideHover(document, position) {
-            const range = document.getWordRangeAtPosition(position, /[A-Za-z_]\w*/);
-            if (!range) return;
-
-            const word = document.getText(range);
-            const meta = ITEMS[word];
-            if (!meta) return;
-
-            const md = new vscode.MarkdownString();
-            md.isTrusted = true;
-            md.appendMarkdown(`**${word}** — ${meta.detail}\n\n`);
-            if (meta.doc) md.appendMarkdown(meta.doc + '\n\n');
-            if (meta.snippet) {
-                const plain = meta.snippet
-                    .replace(/\$\{\d+:([^}]*)\}/g, '$1')
-                    .replace(/\$\d+/g, '');
-                md.appendCodeblock(plain, 'skorpion');
-            }
-            return new vscode.Hover(md, range);
-        }
-    });
-
-    context.subscriptions.push(provider, hover);
+    activateSkorpion(context);
+    activateSpc(context);
 }
 
-function deactivate() {}
+function deactivate() {
+    console.log('[sk-vsce] DEACTIVATED');
+}
 
 module.exports = { activate, deactivate };

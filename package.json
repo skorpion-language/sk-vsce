@@ -25,6 +25,26 @@
           "light": "./icons/skorpion.svg",
           "dark": "./icons/skorpion.svg"
         }
+      },
+      {
+        "id": "spc",
+        "aliases": ["Skorpion Project Configuration", "SPC", "spc"],
+        "extensions": [".spc"],
+        "configuration": "./spc-language-configuration.json",
+        "icon": {
+          "light": "./icons/spc.svg",
+          "dark": "./icons/spc.svg"
+        }
+      }
+    ],
+    "snippets": [
+      {
+        "language": "skorpion",
+        "path": "./snippets/skorpion.json"
+      },
+      {
+        "language": "spc",
+        "path": "./snippets/spc.json"
       }
     ],
     "grammars": [
@@ -34,6 +54,11 @@
         "path": "./syntaxes/sk.tmLanguage.json"
       },
       {
+        "language": "spc",
+        "scopeName": "source.spc",
+        "path": "./syntaxes/spc.tmLanguage.json"
+      },
+      {
         "scopeName": "markdown.skorpion.codeblock",
         "path": "./syntaxes/skorpion-markdown-injection.json",
         "injectTo": ["text.html.markdown"],
@@ -41,6 +66,24 @@
           "meta.embedded.block.skorpion": "skorpion"
         }
       }
-    ]
+    ],
+    "semanticTokenScopes": [
+      {
+        "language": "spc",
+        "scopes": {
+          "string":   ["string.quoted.double.spc"],
+          "number":   ["constant.numeric.float.spc"],
+          "comment":  ["comment.line.number-sign.spc"],
+          "variable": ["entity.name.tag.spc"],
+          "operator": ["punctuation.separator.array.spc"]
+        }
+      }
+    ],
+    "configurationDefaults": {
+      "[spc]": {
+        "editor.bracketPairColorization.enabled": true,
+        "editor.semanticHighlighting.enabled": true
+      }
+    }
   }
 }
