@@ -36,18 +36,16 @@ const ITEMS = {
     arr:    { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Array: `arr[T]`.', snippet: 'arr[${1:int}]' },
 
     // === Встроенные функции ===
-    to_int:    { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `int`.', snippet: 'to_int(${1:value})' },
-    to_float:  { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `float`.', snippet: 'to_float(${1:value})' },
-    to_double: { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `double`.', snippet: 'to_double(${1:value})' },
-    to_bool:   { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `bool`.', snippet: 'to_bool(${1:value})' },
-    to_string: { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `string`.', snippet: 'to_string(${1:value})' },
-    type:      { kind: vscode.CompletionItemKind.Function, detail: 'Built-in', doc: 'Returns the type name.', snippet: 'type(${1:value})' },
+    to_int:     { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `int`.', snippet: 'to_int(${1:value})' },
+    to_float:   { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `float`.', snippet: 'to_float(${1:value})' },
+    to_double:  { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `double`.', snippet: 'to_double(${1:value})' },
+    to_bool:    { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `bool`.', snippet: 'to_bool(${1:value})' },
+    to_string:  { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `string`.', snippet: 'to_string(${1:value})' },
+    type:       { kind: vscode.CompletionItemKind.Function, detail: 'Built-in', doc: 'Returns the real type name.', snippet: 'type(${1:value})' },
+    detruncate: { kind: vscode.CompletionItemKind.Function, detail: 'Built-in', doc: 'Returns the declared type name.', snippet: 'detruncate(${1:value})' },
 
     // === Встроенные типы ошибок ===
     Error:        { kind: vscode.CompletionItemKind.Class, detail: 'Built-in type', doc: 'Base error with `msg`.' },
-    BaseError:    { kind: vscode.CompletionItemKind.Class, detail: 'Built-in type', doc: 'Error with integer `code`.' },
-    NetworkError: { kind: vscode.CompletionItemKind.Class, detail: 'Built-in type', doc: 'Extends `BaseError`. Adds `host`.' },
-    TimeoutError: { kind: vscode.CompletionItemKind.Class, detail: 'Built-in type', doc: 'Extends `NetworkError`. Adds `seconds`.' },
 
     // === Шаблоны ===
     main:     { kind: vscode.CompletionItemKind.Snippet, detail: 'Entry point', doc: 'Main entry point.', snippet: 'void main(arr args) {\n\t$0\n}' },

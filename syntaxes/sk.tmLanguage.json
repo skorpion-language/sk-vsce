@@ -11,8 +11,8 @@
     { "include": "#builtin-types" },
     { "include": "#constants" },
     { "include": "#builtin-functions" },
-    { "include": "#operators" },
     { "include": "#numbers" },
+    { "include": "#operators" },
     { "include": "#strings" },
     { "include": "#functions" },
     { "include": "#types" },
@@ -88,7 +88,7 @@
       "patterns": [
         {
           "name": "storage.type.primitive",
-          "match": "\\b(int|float|double|string|bool|any|void|arr|Error|BaseError|NetworkError|TimeoutError)\\b"
+          "match": "\\b(int|float|double|string|bool|any|void|arr|Error)\\b"
         },
         {
           "match": "\\barr\\s*\\[\\s*(\\w+)\\s*\\]",
@@ -117,7 +117,7 @@
       "patterns": [
         {
           "name": "support.function.builtin",
-          "match": "\\b(to_int|to_float|to_double|to_bool|to_string|type|length)\\b(?=\\s*\\()"
+          "match": "\\b(to_int|to_float|to_double|to_bool|to_string|type|length|detruncate)\\b(?=\\s*\\()"
         }
       ]
     },
@@ -126,7 +126,11 @@
       "patterns": [
         {
           "name": "keyword.operator",
-          "match": "&&|\\|\\||==|!=|<=|>=|\\.\\.|->|[+\\-*/%<>=!?:$]|#|&"
+          "match": "&&|\\|\\||==|!=|<=|>=|\\.\\.|->|[+\\*/%<>=!?:$^]|#|&"
+        },
+        {
+          "name": "keyword.operator",
+          "match": "-\\s"
         }
       ]
     },
@@ -139,11 +143,15 @@
         },
         {
           "name": "constant.numeric.float",
-          "match": "\\b\\d+\\.\\d+\\b"
+          "match": "-?\\d+\\.\\d+f?"
         },
         {
           "name": "constant.numeric.integer",
-          "match": "\\b\\d+\\b"
+          "match": "-?\\d+\\b"
+        },
+        {
+          "name": "constant.numeric.precision",
+          "match": "(?<=\\^)(X\\{\\d+,\\d+\\}|X\\d+|\\d+f?)"
         }
       ]
     },
@@ -154,6 +162,17 @@
           "name": "string.quoted.double",
           "begin": "\"",
           "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single",
+          "begin": "'",
+          "end": "'",
           "patterns": [
             {
               "name": "constant.character.escape",
