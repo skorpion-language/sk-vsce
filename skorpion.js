@@ -53,6 +53,77 @@ const ITEMS = {
     variable: { kind: vscode.CompletionItemKind.Snippet, detail: 'Variable', doc: 'Variable declaration.', snippet: '${1:type} ${2:name} = ${3:value}' }
 };
 
+function escapeRegex(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function isKeyword(w) {
+    return /^(if|elsif|else|while|for|case|try|catch|throw|return|break|continue|new|as|in|use|const|void|includeC|true|false|null)$/.test(w);
+}
+
+function findFunctionDeclaration(document, name, skipLine) {
+    const lines = document.getText().split(/\r\n|\r|\n/);
+
+    for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+        if (lineIdx === skipLine) continue;
+
+        const line = lines[lineIdx];
+
+        // Ищем `name(` БЕЗ пробела между name и скобкой.
+        // Пробел между именем и `(` означает конструкцию (if, while, for, catch),
+        // а не вызов/объявление функции.
+        // Опциональный `*` перед именем — для non-exportable.
+        const declRegex = new RegExp(`(^|[\\s*])(${escapeRegex(name)})\\(`, 'g');
+
+        let m;
+        while ((m = declRegex.exec(line)) !== null) {
+            const nameStart = m.index + m[1].length;
+            const nameEnd = nameStart + name.length;
+
+            // openParen — сразу после имени, без пробелов
+            const openParen = nameEnd;
+
+            // Ищем закрывающую `)` с учётом вложенности
+            let depth = 0;
+            let closeParen = -1;
+            for (let i = openParen; i < line.length; i++) {
+                if (line[i] === '(') depth++;
+                else if (line[i] === ')') {
+                    depth--;
+                    if (depth === 0) { closeParen = i; break; }
+                }
+            }
+            if (closeParen < 0) continue;
+
+            const rest = line.slice(closeParen + 1).trimStart();
+
+            // После `)` — либо `{` на той же строке, либо `{` на следующей непустой
+            let hasBody = rest.startsWith('{');
+            if (!hasBody && rest.length === 0) {
+                for (let j = lineIdx + 1; j < lines.length; j++) {
+                    const next = lines[j].trimStart();
+                    if (next.length === 0) continue;
+                    hasBody = next.startsWith('{');
+                    break;
+                }
+            }
+            if (!hasBody) continue;
+
+            // ПРОВЕРКА: перед именем должен быть тип (непустой beforeName)
+            const beforeName = line.slice(0, nameStart).trimEnd();
+            if (beforeName.length === 0) continue;
+
+            // ПРОВЕРКА: beforeName — не keyword (дополнительная страховка)
+            const kw = beforeName.match(/([A-Za-z_]\w*)\s*$/);
+            if (kw && isKeyword(kw[1])) continue;
+
+            return { line: lineIdx, col: nameStart };
+        }
+    }
+
+    return null;
+}
+
 function activateSkorpion(context) {
     console.log('[skorpion] activate');
 
@@ -103,7 +174,23 @@ function activateSkorpion(context) {
         }
     });
 
-    context.subscriptions.push(provider, hover);
+    const definition = vscode.languages.registerDefinitionProvider('skorpion', {
+        provideDefinition(document, position) {
+            const range = document.getWordRangeAtPosition(position, /[A-Za-z_]\w*/);
+            if (!range) return;
+
+            const word = document.getText(range);
+            const loc = findFunctionDeclaration(document, word, position.line);
+            if (!loc) return;
+
+            return new vscode.Location(
+                document.uri,
+                new vscode.Position(loc.line, loc.col)
+            );
+        }
+    });
+
+    context.subscriptions.push(provider, hover, definition);
 }
 
 module.exports = { activateSkorpion };
