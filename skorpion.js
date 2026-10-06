@@ -35,7 +35,7 @@ const ITEMS = {
     any:    { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Any value.' },
     void:   { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'No return value.' },
     arr:    { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Array: `arr[T]`.', snippet: 'arr[${1:int}]' },
-    union:  { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Union type: `T<T1, T2, ...>`.', snippet: 'T<${1:int}, ${2:...}>' },
+    T:  { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Union type: `T<T1, T2, ...>`.', snippet: 'T<${1:int}, ${2:...}>' },
 
     // === Встроенные функции ===
     to_int:     { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `int`.', snippet: 'to_int(${1:value})' },
@@ -111,6 +111,7 @@ function activateSkorpion(context) {
         'skorpion',
         {
             provideCompletionItems(document, position) {
+                console.log('[skorpion] completion called at', position.line, position.character);
                 const items = [];
                 const seenNames = new Set();
 
@@ -211,6 +212,7 @@ function activateSkorpion(context) {
                     seenNames.add(e.name);
                 }
 
+                console.log('[skorpion] returning', items.length, 'items');
                 return items;
             }
         },
@@ -219,6 +221,7 @@ function activateSkorpion(context) {
 
     const hover = vscode.languages.registerHoverProvider('skorpion', {
         provideHover(document, position) {
+            console.log('[skorpion] hover called');
             const range = document.getWordRangeAtPosition(position, /[A-Za-z_]\w*/);
             if (!range) return;
 
