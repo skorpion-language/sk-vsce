@@ -1,5 +1,6 @@
 // skorpion.js
 const vscode = require('vscode');
+const { analyze, formatType } = require('./lexer');
 
 const ITEMS = {
     // === Ключевые слова ===
@@ -34,7 +35,7 @@ const ITEMS = {
     any:    { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Any value.' },
     void:   { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'No return value.' },
     arr:    { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Array: `arr[T]`.', snippet: 'arr[${1:int}]' },
-    t:    { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Union type: `T<T1, T2, ...>`.', snippet: 'T<${1:int}, ${2:...}>' },
+    union:  { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Union type: `T<T1, T2, ...>`.', snippet: 'T<${1:int}, ${2:...}>' },
 
     // === Встроенные функции ===
     to_int:     { kind: vscode.CompletionItemKind.Function, detail: 'Conversion', doc: 'Converts to `int`.', snippet: 'to_int(${1:value})' },
@@ -46,7 +47,7 @@ const ITEMS = {
     detruncate: { kind: vscode.CompletionItemKind.Function, detail: 'Built-in', doc: 'Returns the declared type name.', snippet: 'detruncate(${1:value})' },
 
     // === Встроенные типы ошибок ===
-    Error:        { kind: vscode.CompletionItemKind.Class, detail: 'Built-in type', doc: 'Base error with `msg`.' },
+    Error:  { kind: vscode.CompletionItemKind.Class, detail: 'Built-in type', doc: 'Base error with `msg`.' },
 
     // === Шаблоны ===
     main:     { kind: vscode.CompletionItemKind.Snippet, detail: 'Entry point', doc: 'Main entry point.', snippet: 'void main(arr args) {\n\t$0\n}' },
@@ -54,76 +55,54 @@ const ITEMS = {
     variable: { kind: vscode.CompletionItemKind.Snippet, detail: 'Variable', doc: 'Variable declaration.', snippet: '${1:type} ${2:name} = ${3:value}' }
 };
 
-function escapeRegex(s) {
-    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// ============================================================
+// Helpers
+// ============================================================
+
+/**
+ * Форматирует сигнатуру функции.
+ * Обратите внимание: у нас params, а не args — как в новом lexer.js.
+ */
+function formatFunctionSignature(fn) {
+    const params = (fn.params || fn.args || [])
+        .map(p => `${formatType(p.type)} ${p.name}`)
+        .join(', ');
+    return `${formatType(fn.returnType)} ${fn.name}(${params})`;
 }
 
-function isKeyword(w) {
-    return /^(if|elsif|else|while|for|case|try|catch|throw|return|break|continue|new|as|in|use|const|void|includeC|true|false|null)$/.test(w);
-}
+/**
+ * Находит функцию, внутри тела которой находится позиция.
+ * @param {Array} functions — из analyze()
+ * @param {number} line — 0-based
+ * @param {number} character — 0-based
+ * @returns {object|null}
+ */
+function findEnclosingFunction(functions, line, character) {
+    for (const fn of functions) {
+        const start = fn.bodyStart;
+        const end = fn.bodyEnd;
+        if (!start || !end) continue;
 
-function findFunctionDeclaration(document, name, skipLine) {
-    const lines = document.getText().split(/\r\n|\r|\n/);
+        // Позиция после {
+        const afterStart =
+            line > start.line ||
+            (line === start.line && character > start.col);
 
-    for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
-        if (lineIdx === skipLine) continue;
+        // Позиция до }
+        const beforeEnd =
+            line < end.line ||
+            (line === end.line && character < end.col);
 
-        const line = lines[lineIdx];
-
-        // Ищем `name(` БЕЗ пробела между name и скобкой.
-        // Пробел между именем и `(` означает конструкцию (if, while, for, catch),
-        // а не вызов/объявление функции.
-        // Опциональный `*` перед именем — для non-exportable.
-        const declRegex = new RegExp(`(^|[\\s*])(${escapeRegex(name)})\\(`, 'g');
-
-        let m;
-        while ((m = declRegex.exec(line)) !== null) {
-            const nameStart = m.index + m[1].length;
-            const nameEnd = nameStart + name.length;
-
-            // openParen — сразу после имени, без пробелов
-            const openParen = nameEnd;
-
-            // Ищем закрывающую `)` с учётом вложенности
-            let depth = 0;
-            let closeParen = -1;
-            for (let i = openParen; i < line.length; i++) {
-                if (line[i] === '(') depth++;
-                else if (line[i] === ')') {
-                    depth--;
-                    if (depth === 0) { closeParen = i; break; }
-                }
-            }
-            if (closeParen < 0) continue;
-
-            const rest = line.slice(closeParen + 1).trimStart();
-
-            // После `)` — либо `{` на той же строке, либо `{` на следующей непустой
-            let hasBody = rest.startsWith('{');
-            if (!hasBody && rest.length === 0) {
-                for (let j = lineIdx + 1; j < lines.length; j++) {
-                    const next = lines[j].trimStart();
-                    if (next.length === 0) continue;
-                    hasBody = next.startsWith('{');
-                    break;
-                }
-            }
-            if (!hasBody) continue;
-
-            // ПРОВЕРКА: перед именем должен быть тип (непустой beforeName)
-            const beforeName = line.slice(0, nameStart).trimEnd();
-            if (beforeName.length === 0) continue;
-
-            // ПРОВЕРКА: beforeName — не keyword (дополнительная страховка)
-            const kw = beforeName.match(/([A-Za-z_]\w*)\s*$/);
-            if (kw && isKeyword(kw[1])) continue;
-
-            return { line: lineIdx, col: nameStart };
+        if (afterStart && beforeEnd) {
+            return fn;
         }
     }
-
     return null;
 }
+
+// ============================================================
+// Activation
+// ============================================================
 
 function activateSkorpion(context) {
     console.log('[skorpion] activate');
@@ -131,8 +110,11 @@ function activateSkorpion(context) {
     const provider = vscode.languages.registerCompletionItemProvider(
         'skorpion',
         {
-            provideCompletionItems() {
+            provideCompletionItems(document, position) {
                 const items = [];
+                const seenNames = new Set();
+
+                // 1) Статические ITEMS
                 for (const [name, meta] of Object.entries(ITEMS)) {
                     const item = new vscode.CompletionItem(name, meta.kind);
                     item.detail = meta.detail;
@@ -145,7 +127,90 @@ function activateSkorpion(context) {
                         item.insertText = new vscode.SnippetString(meta.snippet);
                     }
                     items.push(item);
+                    seenNames.add(name);
                 }
+
+                // 2) Локальные из документа
+                const text = document.getText();
+                const { functions, variables, errorTypes } = analyze(text);
+
+                // Найти функцию, в теле которой стоит курсор
+                const enclosingFn = findEnclosingFunction(
+                    functions,
+                    position.line,
+                    position.character
+                );
+
+                // 2a) Локальные функции
+                for (const fn of functions) {
+                    // Не предлагать функцию в её собственном объявлении
+                    if (fn.line === position.line && fn.col <= position.character) continue;
+                    if (seenNames.has(fn.name)) continue;
+
+                    const item = new vscode.CompletionItem(fn.name, vscode.CompletionItemKind.Function);
+                    item.detail = 'Local Function';
+                    item.insertText = new vscode.SnippetString(`${fn.name}($0)`);
+                    item.documentation = new vscode.MarkdownString(
+                        '```skorpion\n' + formatFunctionSignature(fn) + '\n```'
+                    );
+                    items.push(item);
+                    seenNames.add(fn.name);
+                }
+
+                // 2b) Параметры текущей функции
+                if (enclosingFn) {
+                    for (const p of enclosingFn.params) {
+                        if (seenNames.has(p.name)) continue;
+
+                        const item = new vscode.CompletionItem(
+                            p.name,
+                            vscode.CompletionItemKind.Variable
+                        );
+                        item.detail = `(parameter) ${formatType(p.type)}`;
+                        item.sortText = '0_' + p.name; // параметры выше обычных переменных
+                        item.documentation = new vscode.MarkdownString(
+                            '```skorpion\n' +
+                            `(parameter) ${p.name}: ${formatType(p.type)}\n` +
+                            '```'
+                        );
+                        items.push(item);
+                        seenNames.add(p.name);
+                    }
+                }
+
+                // 2c) Локальные переменные
+                for (const v of variables) {
+                    if (v.line === position.line && v.col <= position.character) continue;
+                    if (seenNames.has(v.name)) continue;
+
+                    const item = new vscode.CompletionItem(v.name, vscode.CompletionItemKind.Variable);
+                    item.detail = 'Local Variable';
+                    item.documentation = new vscode.MarkdownString(
+                        '```skorpion\n' + `${formatType(v.type)} ${v.name}` + '\n```'
+                    );
+                    items.push(item);
+                    seenNames.add(v.name);
+                }
+
+                // 2d) Типы ошибок
+                for (const e of errorTypes) {
+                    if (seenNames.has(e.name)) continue;
+
+                    const item = new vscode.CompletionItem(e.name, vscode.CompletionItemKind.Class);
+                    item.detail = 'Local Error Type';
+
+                    const fields = (e.fields || [])
+                        .map(f => `${f.name}: ${formatType(f.type)}`)
+                        .join(', ');
+                    const signature = `const ${e.name}{${fields}} = new ${e.parent || 'Error'}`;
+
+                    item.documentation = new vscode.MarkdownString(
+                        '```skorpion\n' + signature + '\n```'
+                    );
+                    items.push(item);
+                    seenNames.add(e.name);
+                }
+
                 return items;
             }
         },
@@ -158,20 +223,75 @@ function activateSkorpion(context) {
             if (!range) return;
 
             const word = document.getText(range);
-            const meta = ITEMS[word];
-            if (!meta) return;
 
-            const md = new vscode.MarkdownString();
-            md.isTrusted = true;
-            md.appendMarkdown(`**${word}** — ${meta.detail}\n\n`);
-            if (meta.doc) md.appendMarkdown(meta.doc + '\n\n');
-            if (meta.snippet) {
-                const plain = meta.snippet
-                    .replace(/\$\{\d+:([^}]*)\}/g, '$1')
-                    .replace(/\$\d+/g, '');
-                md.appendCodeblock(plain, 'skorpion');
+            // 1) Статические ITEMS
+            const meta = ITEMS[word];
+            if (meta) {
+                const md = new vscode.MarkdownString();
+                md.isTrusted = true;
+                md.appendMarkdown(`**${word}** — ${meta.detail}\n\n`);
+                if (meta.doc) md.appendMarkdown(meta.doc + '\n\n');
+                if (meta.snippet) {
+                    const plain = meta.snippet
+                        .replace(/\$\{\d+:([^}]*)\}/g, '$1')
+                        .replace(/\$\d+/g, '');
+                    md.appendCodeblock(plain, 'skorpion');
+                }
+                return new vscode.Hover(md, range);
             }
-            return new vscode.Hover(md, range);
+
+            // 2) Локальные из документа
+            const text = document.getText();
+            const { functions, variables, errorTypes } = analyze(text);
+
+            // Параметры текущей функции — приоритетнее одноимённых переменных
+            const enclosingFn = findEnclosingFunction(
+                functions,
+                position.line,
+                position.character
+            );
+            if (enclosingFn) {
+                const param = enclosingFn.params.find(p => p.name === word);
+                if (param) {
+                    const md = new vscode.MarkdownString();
+                    md.appendMarkdown('**(parameter)**\n\n');
+                    md.appendCodeblock(
+                        `(parameter) ${param.name}: ${formatType(param.type)}`,
+                        'skorpion'
+                    );
+                    return new vscode.Hover(md, range);
+                }
+            }
+
+            const fn = functions.find(f => f.name === word);
+            if (fn) {
+                const md = new vscode.MarkdownString();
+                md.appendMarkdown('**Local Function**\n\n');
+                md.appendCodeblock(formatFunctionSignature(fn), 'skorpion');
+                return new vscode.Hover(md, range);
+            }
+
+            const v = variables.find(x => x.name === word);
+            if (v) {
+                const md = new vscode.MarkdownString();
+                md.appendMarkdown('**Local Variable**\n\n');
+                md.appendCodeblock(`${formatType(v.type)} ${v.name}`, 'skorpion');
+                return new vscode.Hover(md, range);
+            }
+
+            const e = errorTypes.find(x => x.name === word);
+            if (e) {
+                const md = new vscode.MarkdownString();
+                md.appendMarkdown('**Local Error Type**\n\n');
+                const fields = (e.fields || [])
+                    .map(f => `${f.name}: ${formatType(f.type)}`)
+                    .join(', ');
+                md.appendCodeblock(
+                    `const ${e.name}{${fields}} = new ${e.parent || 'Error'}`,
+                    'skorpion'
+                );
+                return new vscode.Hover(md, range);
+            }
         }
     });
 
@@ -181,12 +301,19 @@ function activateSkorpion(context) {
             if (!range) return;
 
             const word = document.getText(range);
-            const loc = findFunctionDeclaration(document, word, position.line);
-            if (!loc) return;
+            const text = document.getText();
+            const { functions, variables, errorTypes } = analyze(text);
+
+            const target =
+                functions.find(f => f.name === word) ||
+                variables.find(v => v.name === word) ||
+                errorTypes.find(e => e.name === word);
+
+            if (!target) return;
 
             return new vscode.Location(
                 document.uri,
-                new vscode.Position(loc.line, loc.col)
+                new vscode.Position(target.line, target.col)
             );
         }
     });
