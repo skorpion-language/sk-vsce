@@ -13,13 +13,24 @@
   "engines": {
     "vscode": "^1.70.0"
   },
-  "categories": ["Programming Languages"],
+  "categories": [
+    "Programming Languages"
+  ],
   "contributes": {
     "languages": [
       {
         "id": "skorpion",
-        "aliases": ["Skorpion", "skorpion", "sk", "Sk", "sK", "SK"],
-        "extensions": [".sk"],
+        "aliases": [
+          "Skorpion",
+          "skorpion",
+          "sk",
+          "Sk",
+          "sK",
+          "SK"
+        ],
+        "extensions": [
+          ".sk"
+        ],
         "configuration": "./language-configuration.json",
         "icon": {
           "light": "./icons/skorpion.svg",
@@ -28,8 +39,14 @@
       },
       {
         "id": "spc",
-        "aliases": ["Skorpion Project Configuration", "SPC", "spc"],
-        "extensions": [".spc"],
+        "aliases": [
+          "Skorpion Project Configuration",
+          "SPC",
+          "spc"
+        ],
+        "extensions": [
+          ".spc"
+        ],
         "configuration": "./spc-language-configuration.json",
         "icon": {
           "light": "./icons/spc.svg",
@@ -61,7 +78,9 @@
       {
         "scopeName": "markdown.skorpion.codeblock",
         "path": "./syntaxes/skorpion-markdown-injection.json",
-        "injectTo": ["text.html.markdown"],
+        "injectTo": [
+          "text.html.markdown"
+        ],
         "embeddedLanguages": {
           "meta.embedded.block.skorpion": "skorpion"
         }
@@ -71,11 +90,21 @@
       {
         "language": "spc",
         "scopes": {
-          "string":   ["string.quoted.double.spc"],
-          "number":   ["constant.numeric.float.spc"],
-          "comment":  ["comment.line.number-sign.spc"],
-          "variable": ["entity.name.tag.spc"],
-          "operator": ["punctuation.separator.array.spc"]
+          "string": [
+            "string.quoted.double.spc"
+          ],
+          "number": [
+            "constant.numeric.float.spc"
+          ],
+          "comment": [
+            "comment.line.number-sign.spc"
+          ],
+          "variable": [
+            "entity.name.tag.spc"
+          ],
+          "operator": [
+            "punctuation.separator.array.spc"
+          ]
         }
       }
     ],
@@ -85,12 +114,11 @@
         "editor.semanticHighlighting.enabled": true
       }
     },
-
     "viewsContainers": {
       "activitybar": [
         {
           "id": "skorpion-tools",
-          "title": "Skorpion Tools",
+          "title": "Skorpion",
           "icon": "./icons/skorpion.svg"
         }
       ]
@@ -100,7 +128,7 @@
         {
           "id": "skorpion-main-view",
           "icon": "./icons/sk-vsce-baricon.svg",
-          "name": "Project Actions",
+          "name": "",
           "type": "webview"
         }
       ]
@@ -115,25 +143,35 @@
     "commands": [
       {
         "command": "skorpion.initProject",
-        "title": "Init project",
-        "icon": "$(new-folder)"
+        "title": "Initial project",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "skorpion.unlinkInit",
+        "title": "Unlink initial",
+        "icon": "$(sync-ignored)"
       },
       {
         "command": "skorpion.createTemplate",
         "title": "Create template",
-        "icon": "$(file-add)"
+        "icon": "$(references)"
       },
       {
         "command": "skorpion.updateGitignore",
         "title": "Add (update) .gitignore",
-        "icon": "$(git-ignore)"
+        "icon": "$(file-symlink-file)"
       }
     ],
     "menus": {
       "view/title": [
         {
           "command": "skorpion.initProject",
-          "when": "view == skorpion-main-view",
+          "when": "view == skorpion-main-view && !skorpion.projectInitialized",
+          "group": "navigation"
+        },
+        {
+          "command": "skorpion.unlinkInit",
+          "when": "view == skorpion-main-view && skorpion.projectInitialized",
           "group": "navigation"
         },
         {
@@ -148,5 +186,8 @@
         }
       ]
     }
+  },
+  "dependencies": {
+    "@vscode/codicons": "^0.0.46-24"
   }
 }
