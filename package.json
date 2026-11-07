@@ -84,6 +84,69 @@
         "editor.bracketPairColorization.enabled": true,
         "editor.semanticHighlighting.enabled": true
       }
+    },
+
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "skorpion-tools",
+          "title": "Skorpion Tools",
+          "icon": "./icons/skorpion.svg"
+        }
+      ]
+    },
+    "views": {
+      "skorpion-tools": [
+        {
+          "id": "skorpion-main-view",
+          "icon": "./icons/sk-vsce-baricon.svg",
+          "name": "Project Actions",
+          "type": "webview"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "skorpion-main-view",
+        "contents": "Click 'Init project' to start.",
+        "when": "!skorpion.projectInitialized"
+      }
+    ],
+    "commands": [
+      {
+        "command": "skorpion.initProject",
+        "title": "Init project",
+        "icon": "$(new-folder)"
+      },
+      {
+        "command": "skorpion.createTemplate",
+        "title": "Create template",
+        "icon": "$(file-add)"
+      },
+      {
+        "command": "skorpion.updateGitignore",
+        "title": "Add (update) .gitignore",
+        "icon": "$(git-ignore)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "skorpion.initProject",
+          "when": "view == skorpion-main-view",
+          "group": "navigation"
+        },
+        {
+          "command": "skorpion.createTemplate",
+          "when": "view == skorpion-main-view && skorpion.projectInitialized",
+          "group": "navigation"
+        },
+        {
+          "command": "skorpion.updateGitignore",
+          "when": "view == skorpion-main-view && skorpion.projectInitialized",
+          "group": "navigation"
+        }
+      ]
     }
   }
 }

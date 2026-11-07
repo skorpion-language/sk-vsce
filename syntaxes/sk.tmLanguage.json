@@ -67,7 +67,7 @@
         },
         {
           "name": "constant.language",
-          "match": "\\b(true|false|null)\\b"
+          "match": "\\b(true|false)\\b"
         }
       ]
     },
@@ -88,7 +88,7 @@
       "patterns": [
         {
           "name": "storage.type.primitive",
-          "match": "\\b(int|float|double|string|bool|any|void|arr|Error)\\b"
+          "match": "\\b(int|float|double|string|bool|any|void|arr|char|Error)\\b"
         },
         {
           "match": "\\barr\\s*\\[\\s*(\\w+)\\s*\\]",
@@ -117,7 +117,7 @@
       "patterns": [
         {
           "name": "support.function.builtin",
-          "match": "\\b(to_int|to_float|to_double|to_bool|to_string|type|length|detruncate|isAsyncEnded)\\b(?=\\s*\\()"
+          "match": "\\b(to_int|to_float|to_double|to_bool|to_string|type|length|detruncate)\\b(?=\\s*\\()"
         }
       ]
     },
