@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "skorpion",
+      "request": "launch",
+      "name": "Debug Skorpion Project",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
