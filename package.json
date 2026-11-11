@@ -6,13 +6,7 @@
   "version": "2026.10.1",
   "license": "Apache-2.0",
   "main": "./extension.js",
-  "activationEvents": [
-    "onDebug",
-    "onDebugResolve:skorpion",
-    "onLanguage:skorpion",
-    "onLanguage:spc",
-    "onView:skorpion-main-view"
-  ],
+  "activationEvents": [],
   "repository": {
     "url": "https://github.com/skorpion-language/sk-vsce"
   },
@@ -120,28 +114,6 @@
         "editor.semanticHighlighting.enabled": true
       }
     },
-    "breakpoints": [{ "language": "skorpion" }],
-    "debuggers": [
-      {
-        "type": "skorpion",
-        "label": "Skorpion Debug",
-        "languages": ["skorpion"],
-        "program": "./out/debugAdapter.js",
-        "runtime": "node",
-        "configurationAttributes": {
-          "launch": {
-            "required": ["cwd"],
-            "properties": {
-              "cwd": {
-                "type": "string",
-                "description": "Project root (where manifest.spc is located)",
-                "default": "${workspaceFolder}"
-              }
-            }
-          }
-        }
-      }
-    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -185,11 +157,6 @@
         "icon": "$(references)"
       },
       {
-        "command": "skorpion.run",
-        "title": "Run Skorpion Project",
-        "icon": "$(play)"
-      },
-      {
         "command": "skorpion.updateGitignore",
         "title": "Add (update) .gitignore",
         "icon": "$(file-symlink-file)"
@@ -204,11 +171,6 @@
         },
         {
           "command": "skorpion.unlinkInit",
-          "when": "view == skorpion-main-view && skorpion.projectInitialized",
-          "group": "navigation"
-        },
-        {
-          "command": "skorpion.run",
           "when": "view == skorpion-main-view && skorpion.projectInitialized",
           "group": "navigation"
         },

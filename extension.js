@@ -36,9 +36,6 @@ class SkorpionViewProvider {
                     terminal.sendText('skorpion clear-local');
                     terminal.show();
                     break;
-                case 'run':
-                    await vscode.commands.executeCommand('skorpion.run');
-                    break;
             }
         });
 
@@ -198,10 +195,6 @@ class SkorpionViewProvider {
                     <div class="container">
                         ${projectInfoHtml}
                         
-                        <button class="btn" onclick="send('run')" style="background: var(--vscode-testing-iconPassed); color: #fff; margin-bottom: 12px;">
-                            <span class="codicon codicon-play"></span> Run Project
-                        </button>
-                        
                         <button class="btn" onclick="send('createTemplate')">
                             <span class="codicon codicon-references"></span> Create template
                         </button>
@@ -326,50 +319,6 @@ function activate(context) {
 
             fs.writeFileSync(gitignorePath, content, 'utf8');
             vscode.window.showInformationMessage(`Added ${missing.length} entries to .gitignore.`);
-        }),
-        // НОВАЯ КОМАНДА: Запуск проекта
-        vscode.commands.registerCommand('skorpion.run', async () => {
-            const root = getWorkspaceRoot();
-            if (!root) {
-                vscode.window.showErrorMessage('No workspace folder open.');
-                return;
-            }
-
-            // 1. Проверяем/создаем launch.json
-            const vscodeDir = path.join(root, '.vscode');
-            const launchPath = path.join(vscodeDir, 'launch.json');
-            
-            if (!fs.existsSync(vscodeDir)) {
-                fs.mkdirSync(vscodeDir);
-            }
-            
-            let launchConfig = { version: "0.2.0", configurations: [] };
-            if (fs.existsSync(launchPath)) {
-                try {
-                    const existing = fs.readFileSync(launchPath, 'utf8');
-                    launchConfig = JSON.parse(existing);
-                } catch (e) {}
-            }
-
-            // Проверяем, есть ли уже наша конфигурация
-            if (!launchConfig.configurations) launchConfig.configurations = [];
-            const hasConfig = launchConfig.configurations.some(c => c.type === 'skorpion' && c.name === 'Skorpion: Debug current project');
-            if (!hasConfig) {
-                launchConfig.configurations.push({
-                    type: "skorpion",
-                    request: "launch",
-                    name: "Skorpion: Debug current project",
-                    cwd: "${workspaceFolder}"
-                });
-                fs.writeFileSync(launchPath, JSON.stringify(launchConfig, null, 4), 'utf8');
-            }
-
-            // 2. Запускаем отладчик
-            try {
-                await vscode.debug.startDebugging(vscode.workspace.workspaceFolders[0], 'Skorpion: Debug current project');
-            } catch (err) {
-                vscode.window.showErrorMessage(`Failed to start debugger: ${err.message}`);
-            }
         })
     );
 }
