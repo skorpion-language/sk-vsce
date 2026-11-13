@@ -59,11 +59,11 @@
       "patterns": [
         {
           "name": "keyword.control",
-          "match": "\\b(if|elsif|else|while|for|in|case|try|catch|throw|return|break|continue|do|new|as|use|await|Promise)\\b"
+          "match": "\\b(if|elsif|else|while|for|in|case|try|catch|throw|return|break|continue|do|new|inherit|as|use|await|Promise)\\b"
         },
         {
           "name": "storage.modifier",
-          "match": "\\b(const|void|includeC|async|IknowIdo)\\b"
+          "match": "\\b(const|includeC|async|IknowIdo)\\b"
         },
         {
           "name": "constant.language",
@@ -88,7 +88,7 @@
       "patterns": [
         {
           "name": "storage.type.primitive",
-          "match": "\\b(int|float|double|string|bool|any|void|arr|char|Error)\\b"
+          "match": "\\b(int|float|double|string|bool|any|void|arr|char|dict|Error)\\b"
         },
         {
           "match": "\\barr\\s*\\[\\s*(\\w+)\\s*\\]",
@@ -158,6 +158,21 @@
 
     "strings": {
       "patterns": [
+        {
+          "name": "string.quoted.double",
+          "begin": "\"\"\"",
+          "end": "\"\"\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape",
+              "match": "\\\\."
+            },
+            {
+              "name": "string.quoted.double",
+              "match": "\""
+            }
+          ]
+        },
         {
           "name": "string.quoted.double",
           "begin": "\"",

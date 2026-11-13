@@ -16,8 +16,7 @@ const ITEMS = {
     return: { kind: vscode.CompletionItemKind.Keyword, detail: 'Return', doc: 'Return from a function.', snippet: 'return ${1:value}' },
 
     const:  { kind: vscode.CompletionItemKind.Keyword, detail: 'Declaration', doc: 'Immutable binding.', snippet: 'const ${1:type} ${2:name} = ${3:value}' },
-    err:    { kind: vscode.CompletionItemKind.Keyword, detail: 'Declaration', doc: 'Immutable binding.', snippet: 'const ${1:Name}{${2:field: type}} = new ${3:Error}' },
-    new:    { kind: vscode.CompletionItemKind.Keyword, detail: 'Constructor', doc: 'Creates an instance.', snippet: 'new ${1:Error}' },
+    new:    { kind: vscode.CompletionItemKind.Keyword, detail: 'Constructor', doc: 'Creates an instance.', snippet: 'new ${1:Name}{${2:field: type}} inherit ${3:Error}' },
     as:     { kind: vscode.CompletionItemKind.Keyword, detail: 'Binding', doc: 'Binds a caught error.' },
     use:    { kind: vscode.CompletionItemKind.Keyword, detail: 'Import', doc: 'Imports a module.', snippet: 'use ${1:std/io}' },
     lib:    { kind: vscode.CompletionItemKind.Keyword, detail: 'Import library', doc: 'Imports a library.', snippet: 'use lib:${1:author}/${2:name}' },
@@ -39,6 +38,7 @@ const ITEMS = {
     any:    { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Any value.' },
     void:   { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'No return value.' },
     arr:    { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Array: `arr[T]`.', snippet: 'arr[${1:int}]' },
+    dict:   { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Dictionary: `dict`.', snippet: 'dict' },
     T:      { kind: vscode.CompletionItemKind.TypeParameter, detail: 'Type', doc: 'Union type: `T<T1, T2, ...>`.', snippet: 'T<${1:int}, ${2:...}>' },
 
     // === Встроенные функции ===
